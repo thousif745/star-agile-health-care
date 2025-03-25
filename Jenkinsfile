@@ -20,14 +20,14 @@ pipeline {
     stage('Generate Test Report') {
       steps {
         echo 'Checking TestNG report generation'
-        sh 'ls -l /var/lib/jenkins/workspace/Healthcare/target/surefire-reports'  // Check if report exists
+        sh 'ls -l /var/lib/jenkins/workspace/healthcare/target/surefire-reports'  // Check if report exists
         
         echo 'Generating test report using TestNG'
         publishHTML([
           allowMissing: false, 
           alwaysLinkToLastBuild: false, 
           keepAll: false, 
-          reportDir: '/var/lib/jenkins/workspace/Healthcare/target/surefire-reports', 
+          reportDir: '/var/lib/jenkins/workspace/healthcare/target/surefire-reports', 
           reportFiles: 'index.html', 
           reportName: 'HTML Report', 
           reportTitles: ''
