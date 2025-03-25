@@ -11,47 +11,46 @@ pipeline {
         git branch: 'master', url: 'https://github.com/thousif745/star-agile-health-care.git'
                         }
             }
-  stage('Create Package') {
+    stage('Create Package') {
       steps {
         echo 'This stage will compile, test, package my application'
         sh 'mvn package'
                           }
             }
-  stage('Generate Test Report') {
+    stage('Generate Test Report') {
       steps {
         echo 'This stage generate Test report using TestNG'
-        publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: '/var/lib/jenkins/workspace/healthcare/target/surefire-reports', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+        publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: '/var/lib/jenkins/workspace/Healthcare/target/surefire-reports', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: '', useWrapperFileDirectly: true])
                           }
             }
-  stage('Create Docker Image') {
+     stage('Create Docker Image') {
       steps {
         echo 'This stage will Create a Docker image'
         sh 'docker build -t thousifahamed/healthcare:latest .'
                           }
-  }
-  stage('Login to Dockerhub') {
+            }
+     stage('Login to Dockerhub') {
       steps {
              withCredentials([usernamePassword(credentialsId: 'dockeruser', passwordVariable: 'password', usernameVariable: 'username')]) {
           // withCredentials([usernameColonPassword(credentialsId: 'docker-id-user', variable: 'docker-all')]) {
           // withCredentials([string(credentialsId: 'dockercode', variable: 'dockervarcode')]) {
-           sh 'docker login -u thousifahamed -p ${password}'  }
-    
+           sh 'docker login -u thousifahamed -p ${password}'
             }
          }
      }
-  stage('Docker Push-Image') {
+    stage('Docker Push-Image') {
       steps {
         echo 'This stage will push my new image to the dockerhub'
         sh 'docker push thousifahamed/healthcare:latest'
             }
       }
-  stage('AWS-Login') {
+    stage('AWS-Login') {
       steps {
         withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'Awsaccess', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
          }
       }
     }
-  stage('Terraform Operations for test workspace') {
+    stage('Terraform Operations for test workspace') {
       steps {
         script {
           sh '''
@@ -63,24 +62,24 @@ pipeline {
         }
       }
     }
-  stage('Terraform destroy & apply for test workspace') {
+    stage('Terraform destroy & apply for test workspace') {
       steps {
         sh 'terraform apply -auto-approve'
       }
     }
-  stage('get kubeconfig') {
+    stage('get kubeconfig') {
       steps {
         sh 'aws eks update-kubeconfig --region us-east-1 --name test-cluster'
         sh 'kubectl get nodes'
       }
     }
-  stage('Deploying the application') {
+    stage('Deploying the application') {
       steps {
         sh 'kubectl apply -f app-deploy.yml'
         sh 'kubectl get svc'
       }
     }
-  stage('Terraform Operations for Production workspace') {
+    stage('Terraform Operations for Production workspace') {
       when {
         expression {
           return currentBuild.currentResult == 'SUCCESS'
@@ -97,18 +96,18 @@ pipeline {
         }
       }
     }
-  stage('Terraform destroy & apply for production workspace') {
+    stage('Terraform destroy & apply for production workspace') {
       steps {
         sh 'terraform apply -auto-approve'
       }
     }
-  stage('get kubeconfig for production') {
+    stage('get kubeconfig for production') {
       steps {
         sh 'aws eks update-kubeconfig --region us-east-1 --name prod-cluster'
         sh 'kubectl get nodes'
       }
     }
-  stage('Deploying the application to production') {
+    stage('Deploying the application to production') {
       steps {
         sh 'kubectl apply -f app-deploy.yml'
         sh 'kubectl get svc'
