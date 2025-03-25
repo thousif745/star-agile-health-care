@@ -8,7 +8,7 @@ pipeline {
     stage('Git Checkout') {
       steps {
         echo 'This stage is to clone the repo from github'
-        git branch: 'master', url: 'https://github.com/rohinicbabu/star-agile-health-care.git'
+        git branch: 'master', url: 'https://github.com/thousif745/star-agile-health-care.git'
                         }
             }
     stage('Create Package') {
@@ -20,27 +20,28 @@ pipeline {
     stage('Generate Test Report') {
       steps {
         echo 'This stage generate Test report using TestNG'
-        publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: '/var/lib/jenkins/workspace/Healthcare/target/surefire-reports', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+        publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: '/var/lib/jenkins/workspace/healthcare/target/surefire-reports', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: '', useWrapperFileDirectly: true])
                           }
             }
      stage('Create Docker Image') {
       steps {
         echo 'This stage will Create a Docker image'
-        sh 'docker build -t cbabu85/healthcare:1.0 .'
+        sh 'docker build -t thousifahamed/healthcare:latest .'
                           }
-            }
-     stage('Login to Dockerhub') {
+           stage('Login to Dockerhub') {
       steps {
-        echo 'This stage will loginto Dockerhub' 
-        withCredentials([usernamePassword(credentialsId: 'dockerloginnew', passwordVariable: 'dockerpass', usernameVariable: 'dockeruser')]) {
-        sh 'docker login -u ${dockeruser} -p ${dockerpass}'
+             withCredentials([usernamePassword(credentialsId: 'dockeruser', passwordVariable: 'password', usernameVariable: 'username')]) {
+          // withCredentials([usernameColonPassword(credentialsId: 'docker-id-user', variable: 'docker-all')]) {
+          // withCredentials([string(credentialsId: 'dockercode', variable: 'dockervarcode')]) {
+           sh 'docker login -u thousifahamed -p ${password}'  }
+    
             }
          }
      }
     stage('Docker Push-Image') {
       steps {
         echo 'This stage will push my new image to the dockerhub'
-        sh 'docker push cbabu85/healthcare:1.0'
+        sh 'docker push thousifahamed/healthcare:latest'
             }
       }
     stage('AWS-Login') {
