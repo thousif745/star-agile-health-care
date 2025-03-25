@@ -28,6 +28,7 @@ pipeline {
         echo 'This stage will Create a Docker image'
         sh 'docker build -t thousifahamed/healthcare:latest .'
                           }
+  }
   stage('Login to Dockerhub') {
       steps {
              withCredentials([usernamePassword(credentialsId: 'dockeruser', passwordVariable: 'password', usernameVariable: 'username')]) {
