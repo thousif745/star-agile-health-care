@@ -19,16 +19,21 @@ pipeline {
             }
     stage('Generate Test Report') {
       steps {
-        echo 'This stage generate Test report using TestNG'
-        publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: '/var/lib/jenkins/workspace/Healthcare/target/surefire-reports', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: '', useWrapperFileDirectly: true])
-                          }
-            }
-     stage('Create Docker Image') {
-      steps {
-        echo 'This stage will Create a Docker image'
-        sh 'docker build -t thousifahamed/healthcare:latest .'
-                          }
-            }
+        echo 'Checking TestNG report generation'
+        sh 'ls -l /var/lib/jenkins/workspace/Healthcare/target/surefire-reports'  // Check if report exists
+        
+        echo 'Generating test report using TestNG'
+        publishHTML([
+          allowMissing: false, 
+          alwaysLinkToLastBuild: false, 
+          keepAll: false, 
+          reportDir: '/var/lib/jenkins/workspace/Healthcare/target/surefire-reports', 
+          reportFiles: 'index.html', 
+          reportName: 'HTML Report', 
+          reportTitles: ''
+        ])
+      }
+    }
      stage('Login to Dockerhub') {
       steps {
              withCredentials([usernamePassword(credentialsId: 'dockeruser', passwordVariable: 'password', usernameVariable: 'username')]) {
@@ -44,75 +49,25 @@ pipeline {
         sh 'docker push thousifahamed/healthcare:latest'
             }
       }
-    stage('AWS-Login') {
-      steps {
-        withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'Awsaccess', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-         }
-      }
-    }
-    stage('Terraform Operations for test workspace') {
-      steps {
-        script {
-          sh '''
-            terraform workspace select test || terraform workspace new test
-            terraform init
-            terraform plan
-            terraform destroy -auto-approve
-          '''
-        }
-      }
-    }
-    stage('Terraform destroy & apply for test workspace') {
-      steps {
-        sh 'terraform apply -auto-approve'
-      }
-    }
-    stage('get kubeconfig') {
-      steps {
-        sh 'aws eks update-kubeconfig --region us-east-1 --name test-cluster'
-        sh 'kubectl get nodes'
-      }
-    }
-    stage('Deploying the application') {
-      steps {
-        sh 'kubectl apply -f app-deploy.yml'
-        sh 'kubectl get svc'
-      }
-    }
-    stage('Terraform Operations for Production workspace') {
-      when {
-        expression {
-          return currentBuild.currentResult == 'SUCCESS'
-        }
-      }
-      steps {
-        script {
-          sh '''
-            terraform workspace select prod || terraform workspace new prod
-            terraform init
-            terraform plan
-            terraform destroy -auto-approve
-          '''
-        }
-      }
-    }
-    stage('Terraform destroy & apply for production workspace') {
-      steps {
-        sh 'terraform apply -auto-approve'
-      }
-    }
-    stage('get kubeconfig for production') {
-      steps {
-        sh 'aws eks update-kubeconfig --region us-east-1 --name prod-cluster'
-        sh 'kubectl get nodes'
-      }
-    }
-    stage('Deploying the application to production') {
-      steps {
-        sh 'kubectl apply -f app-deploy.yml'
-        sh 'kubectl get svc'
-      }
-    }
+   stage('Deploying to Kubernetes with Ansible') {
+  steps {
+    echo 'Deploying application to Kubernetes cluster using Ansible'
+    sh """
+      ansible-playbook -i /etc/ansible/hosts ansible-playbook.yml -e 'ansible_ssh_common_args=-o StrictHostKeyChecking=no'
+    """
+    sh 'kubectl apply -f deploy.yml'
   }
 }
+    
+  //  stage('Deploying to Kubernetes with Ansible') {
+   //   steps {
+   //     echo 'Deploying application to Kubernetes cluster using Ansible'
+   //     sh 'ansible-playbook -i /etc/ansible/hosts ansible-playbook.yml'
+   //     sh 'kubectl apply -f deploy.yml'  // Apply the Kubernetes manifest after Ansible deployment
+   //   }
+   // }
+  }
+}  
+      
+  
  
