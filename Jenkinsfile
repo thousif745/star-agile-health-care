@@ -53,9 +53,11 @@ pipeline {
   steps {
     echo 'Deploying application to Kubernetes cluster using Ansible'
     sh """
-      ansible-playbook -i /etc/ansible/hosts ansible-playbook.yml -e ansible_ssh_common_args='-o StrictHostKeyChecking=no'
-    """
-    sh 'kubectl apply -f deploy.yml'
+       ansible-playbook -i /etc/ansible/hosts ansible-playbook.yml \
+      -e 'ansible_ssh_common_args=\"-o StrictHostKeyChecking=no\"' \
+      -u ubuntu --private-key /var/lib/jenkins/.ssh/id_rsa
+       """
+    sh "kubectl apply -f deploy.yml"
   }
 }
     
