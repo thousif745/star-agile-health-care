@@ -1,0 +1,18 @@
+---
+- name: Deploy Healthcare App
+  hosts: hostserver
+  become: true
+  tasks:
+    - name: Ensure Docker is Installed
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Run Healthcare Container
+      docker_container:
+        name: healthcare_container
+        image: thousifahamed/healthcare:latest
+        state: started
+        restart_policy: always
+        published_ports:
+          - "8084:8082"
