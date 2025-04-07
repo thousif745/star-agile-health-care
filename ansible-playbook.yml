@@ -23,4 +23,12 @@
     - name: Deploy Docker Container
       command: docker run -itd -p 8084:8082 --name healthcare thousifahamed/healthcare:latest
 
+    - name: Remove existing container
+      command: docker rm -f healthcare
+      ignore_errors: yes
+
+    - name: Deploy Docker Container
+      command: docker run -d -p 8084:8082 --name healthcare thousifahamed/healthcare:latest
+
+
 
