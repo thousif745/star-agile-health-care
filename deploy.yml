@@ -35,12 +35,5 @@ spec:
       port: 8085
       targetPort: 8082  # Should match the containerPort in Deployment
       nodePort: 30082  # Exposed NodePort
-      - name: Deploy Docker Container
-  docker_container:
-    name: healthcare_v2
-    image: thousifahamed/healthcare:latest
-    state: started
-    restart_policy: always
-    ports:
-      - "9090:8082"
+      
 
