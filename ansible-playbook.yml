@@ -23,7 +23,13 @@
     - name: Deploy Docker Container
       command: docker run -itd -p 9090:8082 --name healthcare_v2 thousifahamed/healthcare:latest
 
-    
+   - name: Remove existing healthcare_v2 container (if any)
+     command: docker rm -f healthcare_v2
+     ignore_errors: yes
+
+  - name: Deploy Docker Container
+    command: docker run -itd -p 9090:8082 --name healthcare_v2 thousifahamed/healthcare:latest
+
 
 
 
