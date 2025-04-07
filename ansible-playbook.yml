@@ -1,27 +1,38 @@
 
-- name: Configure Docker on EC2 Instances
-  hosts: hostserver
+---
+- name: Deploy Healthcare App
+  hosts: all
   become: yes
-  connection: ssh
-
   tasks:
-    - name: Update apt packages
-      apt:
-        update_cache: yes
 
-    - name: Install Docker
-      apt:
-        name: docker.io
-        state: present
+    - name: Check if the container is running
+      command: docker ps -q -f name=healthcare_v2
+      register: running_container
+      changed_when: false
 
-    - name: Start and Enable Docker Service
-      service:
-        name: docker
-        state: started
-        enabled: yes
+    - name: Stop and remove existing container if running
+      command: docker rm -f healthcare_v2
+      when: running_container.stdout != ""
+      ignore_errors: yes
 
-    - name: Deploy Docker Container
+    - name: Remove the old Docker image
+      command: docker rmi -f thousifahamed/healthcare:latest
+      ignore_errors: yes
+
+    - name: Pull the latest Docker image
+      command: docker pull thousifahamed/healthcare:latest
+
+    - name: Run the new container
       command: docker run -itd -p 9090:8082 --name healthcare_v2 thousifahamed/healthcare:latest
+
+    - name: Verify running containers
+      command: docker ps
+      register: container_status
+
+    - name: Display running containers
+      debug:
+        var: container_status.stdout
+
 
    
 
