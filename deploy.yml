@@ -19,7 +19,14 @@ spec:
         - name: capstone-app-container
           image: thousifahamed/healthcare:v2
           ports:
-            - containerPort: 8082  # Fixed to match the targetPort in the service
+            - containerPort: 8082  # Matches targetPort in Service
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
 
 ---
 apiVersion: v1
@@ -32,8 +39,6 @@ spec:
     app: healthcare-app
   ports:
     - protocol: TCP
-      port: 8085
-      targetPort: 8082  # Should match the containerPort in Deployment
-      nodePort: 30082  # Exposed NodePort
-      
-
+      port: 8082  # Matches containerPort
+      targetPort: 8082  # Matches containerPort
+      nodePort: 30082  # Ensure this port is available
