@@ -9,20 +9,6 @@
       apt:
         update_cache: yes
 
-    - name: Install Docker
-      apt:
-        name: docker.io
-        state: present
-
-    - name: Start and Enable Docker Service
-      service:
-        name: docker
-        state: started
-        enabled: yes
-
-    - name: Deploy Docker Container
-      command: docker run -itd -p 9090:8082 --name healthcare thousifahamed/healthcare:v2
-
     - name: Check if Docker is installed
       command: docker --version
       register: docker_installed
@@ -36,7 +22,10 @@
     when: docker_installed.rc != 0
 
 
+    - name: Deploy Docker Container
+      command: docker run -itd -p 9090:8082 --name healthcare thousifahamed/healthcare:v2
 
+  
 
 
    
