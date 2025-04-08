@@ -23,7 +23,18 @@
     - name: Deploy Docker Container
       command: docker run -itd -p 9090:8082 --name healthcare thousifahamed/healthcare:v2
 
-   
+    - name: Check if Docker is installed
+      command: docker --version
+      register: docker_installed
+      ignore_errors: yes
+      changed_when: false
+
+   - name: Install Docker
+     apt:
+    name: docker.io=26.1.3-0ubuntu1~24.04.1
+    state: present
+    when: docker_installed.rc != 0
+
 
 
 
