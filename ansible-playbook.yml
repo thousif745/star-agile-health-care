@@ -1,5 +1,5 @@
-
-  - name: Configure Docker on EC2 Instances
+---
+- name: Configure Docker on EC2 Instances
   hosts: hostserver
   become: yes
 
@@ -23,9 +23,6 @@
     - name: Deploy Docker Container
       command: docker run -itd -p 9090:8082 --name healthcare thousifahamed/healthcare:v2
 
-
-
-   
 
 
 
