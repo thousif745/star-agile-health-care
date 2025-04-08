@@ -34,11 +34,10 @@ kind: Service
 metadata:
   name: healthcare-app-service
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     app: healthcare-app
   ports:
     - protocol: TCP
-      port: 8082  # Matches containerPort
-      targetPort: 8082  # Matches containerPort
-      nodePort: 30082  # Ensure this port is available
+      port: 8082
+      targetPort: 8082
